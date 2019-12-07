@@ -11,15 +11,15 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("File")
-public class FileControllers {
+public class FileController {
     @Autowired
-    FileStorageService fIleStorageService;
+    FileStorageService fileStorageService;
 
     @PostMapping("/uploadFile")
-    public ResponseEntity<String> storeFile(@RequestParam("user") String userName,
+    public ResponseEntity<String> storeFile(@RequestParam("userName") String userName,
                                             @RequestParam("file") MultipartFile file) {
         try {
-            String fileName = fIleStorageService.storeFile(file);
+            String fileName = fileStorageService.storeFile(file, userName);
             return new ResponseEntity<>(fileName, HttpStatus.OK);
         } catch (IOException e) {
             e.printStackTrace();

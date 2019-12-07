@@ -1,11 +1,12 @@
 package com.customjobs.networking.utils;
 
 import com.customjobs.networking.configurations.FileStorageConfigurations;
+import com.customjobs.networking.helpers.ScriptDbHelpers;
+import com.fasterxml.uuid.Generators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -21,6 +22,9 @@ public class FileStorageService {
     private final Path fileAbsolutePath;
 
     @Autowired
+    private ScriptDbHelpers scriptDbHelpers;
+
+    @Autowired
     public FileStorageService(FileStorageConfigurations fileStorageConfigurations) {
         this.fileAbsolutePath = Paths.get(fileStorageConfigurations.getUploadDir());
         try {
@@ -30,11 +34,14 @@ public class FileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file) throws IOException {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+    public String storeFile(MultipartFile file, String userName) throws IOException {
+        String name = getUuid();
+        String filePrefix = file.getOriginalFilename().split("\\.")[0];
+        String fileName = file.getOriginalFilename().replace(filePrefix, name);
         Path targetLocation = this.fileAbsolutePath.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-        return targetLocation.toAbsolutePath().toString();
+        scriptDbHelpers.createRecord(userName, fileName, fileAbsolutePath.toAbsolutePath().toString(), ScriptStatus.QUEUED);
+        return fileName;
     }
 
     public Resource loadFileAsResource(String fileName) {
@@ -49,4 +56,10 @@ public class FileStorageService {
         }
         throw new RuntimeException("File not found");
     }
+
+    private String getUuid() {
+        return Generators.timeBasedGenerator().generate().toString();
+    }
+
+
 }
