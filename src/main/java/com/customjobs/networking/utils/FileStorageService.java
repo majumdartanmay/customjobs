@@ -1,6 +1,7 @@
 package com.customjobs.networking.utils;
 
 import com.customjobs.networking.configurations.FileStorageConfigurations;
+import com.customjobs.networking.entity.Scripts;
 import com.customjobs.networking.helpers.ScriptDbHelpers;
 import com.fasterxml.uuid.Generators;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +35,14 @@ public class FileStorageService {
         }
     }
 
-    public String storeFile(MultipartFile file, String userName) throws IOException {
+    public Scripts storeFile(MultipartFile file, String userName) throws IOException {
         String name = getUuid();
         String filePrefix = file.getOriginalFilename().split("\\.")[0];
         String fileName = file.getOriginalFilename().replace(filePrefix, name);
         Path targetLocation = this.fileAbsolutePath.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-        scriptDbHelpers.createRecord(userName, fileName, fileAbsolutePath.toAbsolutePath().toString(), ScriptStatus.QUEUED);
-        return fileName;
+        Scripts data = scriptDbHelpers.createRecord(userName, fileName, fileAbsolutePath.toAbsolutePath().toString(), ScriptStatus.QUEUED);
+        return data;
     }
 
     public Resource loadFileAsResource(String fileName) {

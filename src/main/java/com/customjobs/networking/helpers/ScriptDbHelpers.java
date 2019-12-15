@@ -13,7 +13,9 @@ public class ScriptDbHelpers {
     @Autowired
     ScriptsRepository scriptsRepository;
 
-    public void createRecord(String userName, String fileName, String absolutePath, ScriptStatus scriptStatus) {
+    public Scripts createRecord(String userName, String fileName, String absolutePath, ScriptStatus scriptStatus) {
+        Scripts data = new Scripts(fileName, userName, absolutePath, scriptStatus);
         scriptsRepository.save(new Scripts(fileName, userName, absolutePath, scriptStatus));
+        return data;
     }
 }
