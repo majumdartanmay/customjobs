@@ -17,7 +17,7 @@ import java.nio.file.Path;
 
 @RestController
 @RequestMapping("executor")
-public class ExecutorController {
+public class ScriptController {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;

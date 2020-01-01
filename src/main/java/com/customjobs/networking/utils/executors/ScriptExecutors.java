@@ -52,7 +52,7 @@ public class ScriptExecutors {
 
         ExecutorService service = Executors.newSingleThreadExecutor();
         service.execute(() -> {
-            commandExecutors.executeCommand(String.format("%s/scripts/python %s", virtualPath, scriptName));
+            commandExecutors.executeCommand(String.format("%s\\Scripts\\python.exe", virtualPath) , scriptName);
         });
 
         ExecutorService timer = Executors.newCachedThreadPool();

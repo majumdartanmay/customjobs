@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 @Data
 public class CommandExecutors {
     String workingDirectory;
-    public void executeCommand(String... command) {
+    public String executeCommand(String... command) {
+        StringBuilder stringBuilder = new StringBuilder();
+
         try {
             ProcessBuilder builder = new ProcessBuilder(
                     command);
@@ -21,11 +23,15 @@ public class CommandExecutors {
             String line;
             while (true) {
                 line = r.readLine();
-                if (line == null) { break; }
-                System.out.println(line);
+                if (line == null) { break;
+                }else{
+                    stringBuilder.append(line);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return stringBuilder.toString();
     }
 }
