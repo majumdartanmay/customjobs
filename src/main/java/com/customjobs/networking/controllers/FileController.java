@@ -31,15 +31,12 @@ public class FileController {
     FileStorageService fileStorageService;
 
     @PostMapping("/uploadFile")
-    public ResponseEntity<?> storeFile(@RequestParam("userName") String userName,
-                                            @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> storeFile(
+            @RequestParam("userName") String userName,
+            @RequestParam("file") MultipartFile file)
+    {
         try {
             Scripts data = fileStorageService.storeFile(file, userName);
-            messageSender.sendMessage(
-                    rabbitTemplate,
-                    rabbitMQConfigurations.getQueueExchange(),
-                    rabbitMQConfigurations.getRoutingKey(),
-                    data);
             return new ResponseEntity<>(data, HttpStatus.OK);
         } catch (IOException e) {
             e.printStackTrace();
