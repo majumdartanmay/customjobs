@@ -49,6 +49,11 @@ public class CustomJobsApplication implements RabbitListenerConfigurer {
 	}
 
 	@Bean
+	Queue getScriptExecutionQueue() {
+		return new Queue(getRabbitMQConfigurations().getExecutionQueueName());
+	}
+
+	@Bean
 	public TopicExchange getCustomJobsExchange(){
 		return new TopicExchange(getRabbitMQConfigurations().getQueueExchange());
 	}
@@ -59,6 +64,14 @@ public class CustomJobsApplication implements RabbitListenerConfigurer {
 				bind(getCustomJobsQueue()).
 				to(getCustomJobsExchange()).
 				with(getRabbitMQConfigurations().getRoutingKey());
+	}
+
+	@Bean
+	public Binding declareExecutionQueueBinding() {
+		return BindingBuilder
+				.bind(getScriptExecutionQueue())
+				.to(getCustomJobsExchange())
+				.with(getRabbitMQConfigurations().getExecutionQueueRoutingKey());
 	}
 
 	@Bean

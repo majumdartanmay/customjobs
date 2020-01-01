@@ -3,7 +3,7 @@ package com.customjobs.networking.utils.executors;
 
 import com.customjobs.networking.utils.CommandExecutors;
 import com.customjobs.networking.utils.FileStorageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.customjobs.networking.utils.Queue.QueueCommunicationUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,12 +14,10 @@ public class ScriptExecutors {
     private String absolutePath;
     private String user;
     private String scriptName;
-    private int timeout;
+    private int timeout = 10;
     private CommandExecutors commandExecutors;
     private static final String virtualEnvPrefix = "venv";
-
-    @Autowired
-    FileStorageService fileStorageService;
+    private QueueCommunicationUtils queueCommunicationUtils;
 
     public ScriptExecutors(String absolutePath, String user, String scriptName) {
         this.absolutePath = absolutePath;
@@ -30,7 +28,10 @@ public class ScriptExecutors {
         if (!isDirectoryExists(virtualEnvPrefix)) {
             setVirtualEnvironment(virtualEnvPrefix);
         }
-       // activateVirtualEnvironment(user);
+    }
+
+    public void setQueueCommunicationUtils(QueueCommunicationUtils queueCommunicationUtils) {
+        this.queueCommunicationUtils = queueCommunicationUtils;
     }
 
     private void activateVirtualEnvironment(String virtualEnvironment) {
@@ -46,27 +47,40 @@ public class ScriptExecutors {
         return Files.exists(path);
     }
 
-    public void executeScript() {
+
+    public void executeScript(FileStorageService fileStorageService) {
 
         String virtualPath = fileStorageService.getVirtualEnvironmentOfUser(user, virtualEnvPrefix);
-
+        try {
         ExecutorService service = Executors.newSingleThreadExecutor();
         service.execute(() -> {
-            commandExecutors.executeCommand(String.format("%s\\Scripts\\python.exe", virtualPath) , scriptName);
-        });
+                String output = commandExecutors.executeCommand (
+                        String.format("%s\\Scripts\\python.exe", virtualPath) , scriptName);
+                System.out.println(output);
+                sendMessage(output);
+            }
+        );
 
         ExecutorService timer = Executors.newCachedThreadPool();
-        Callable timeoutCallback = () -> {
+        Callable<String> timeoutCallback = () -> {
             service.shutdownNow();
-            return null;
+            return "Script time limit exceeded";
         };
 
-        Future timeoutFuture = timer.submit(timeoutCallback);
-        try{
-            timeoutFuture.get(timeout, TimeUnit.SECONDS);
+        Future<String> timeoutFuture = timer.submit(timeoutCallback);
+        String output = timeoutFuture.get(timeout, TimeUnit.SECONDS);
+        sendMessage(output);
+        //rabbitTemplate.convertAndSend();
+
         }catch (Exception e){
             e.printStackTrace();
         }
 
+    }
+
+    private void sendMessage(String output) {
+        if (queueCommunicationUtils != null) {
+            queueCommunicationUtils.sendMessageForScriptExecutionStatus(output);
+        }
     }
 }

@@ -40,18 +40,16 @@ public class FileStorageService {
         if (!Files.exists(completePath)) {
             Files.createDirectory(completePath);
         }
-        this.fileAbsolutePath = completePath;
-
         String name = getUuid();
         String filePrefix = file.getOriginalFilename().split("\\.")[0];
         String fileName = file.getOriginalFilename().replace(filePrefix, name);
-        Path targetLocation = this.fileAbsolutePath.resolve(fileName);
+        Path targetLocation = completePath.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
         Scripts data = scriptDbHelpers.createRecord(
                 userName,
                 fileName,
-                fileAbsolutePath.toAbsolutePath().toString(),
+                completePath.toAbsolutePath().toString(),
                 ScriptStatus.QUEUED);
 
         return data;

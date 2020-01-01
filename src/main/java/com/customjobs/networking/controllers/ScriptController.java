@@ -4,6 +4,7 @@ import com.customjobs.networking.configurations.RabbitMQConfigurations;
 import com.customjobs.networking.dto.ScriptExecutionModel;
 import com.customjobs.networking.utils.FileStorageService;
 import com.customjobs.networking.utils.Queue.MessageSender;
+import com.customjobs.networking.utils.Queue.QueueCommunicationUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,14 +20,17 @@ import java.nio.file.Path;
 @RequestMapping("executor")
 public class ScriptController {
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+//    @Autowired
+//    private RabbitTemplate rabbitTemplate;
+//
+//    @Autowired
+//    private RabbitMQConfigurations rabbitMQConfigurations;
+//
+//    @Autowired
+//    private MessageSender messageSender;
 
     @Autowired
-    private RabbitMQConfigurations rabbitMQConfigurations;
-
-    @Autowired
-    private MessageSender messageSender;
+    QueueCommunicationUtils queueCommunicationUtils;
 
     @Autowired
     FileStorageService fileStorageService;
@@ -42,12 +46,7 @@ public class ScriptController {
             Path completePath = fileStorageService.getCompletePath(userName);
             String absolutePath = completePath.toString();
             ScriptExecutionModel requestModel = new ScriptExecutionModel(absolutePath, scriptId, userName);
-            messageSender.sendMessage(
-                    rabbitTemplate,
-                    rabbitMQConfigurations.getQueueExchange(),
-                    rabbitMQConfigurations.getRoutingKey(),
-                    requestModel);
-
+            queueCommunicationUtils.sendMessageForScriptExecution(requestModel);
             return new ResponseEntity<>("Queued", HttpStatus.OK);
 
         }catch (Exception ex) {
