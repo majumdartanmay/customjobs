@@ -1,16 +1,15 @@
 package com.customjobs.networking.utils.executors;
 
-
 import com.customjobs.networking.utils.CommandExecutors;
 import com.customjobs.networking.utils.FileStorageService;
 import com.customjobs.networking.utils.Queue.QueueCommunicationUtils;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.*;
 
 public class ScriptExecutors {
+
     private String absolutePath;
     private String user;
     private String scriptName;
@@ -20,11 +19,13 @@ public class ScriptExecutors {
     private QueueCommunicationUtils queueCommunicationUtils;
 
     public ScriptExecutors(String absolutePath, String user, String scriptName) {
+
         this.absolutePath = absolutePath;
         this.user = user;
         this.scriptName = scriptName;
         commandExecutors = new CommandExecutors();
         commandExecutors.setWorkingDirectory(absolutePath);
+
         if (!isDirectoryExists(virtualEnvPrefix)) {
             setVirtualEnvironment(virtualEnvPrefix);
         }
@@ -51,8 +52,11 @@ public class ScriptExecutors {
     public void executeScript(FileStorageService fileStorageService) {
 
         String virtualPath = fileStorageService.getVirtualEnvironmentOfUser(user, virtualEnvPrefix);
+
         try {
+
         ExecutorService service = Executors.newSingleThreadExecutor();
+
         service.execute(() -> {
                 String output = commandExecutors.executeCommand (
                         String.format("%s\\Scripts\\python.exe", virtualPath) , scriptName);
@@ -70,7 +74,6 @@ public class ScriptExecutors {
         Future<String> timeoutFuture = timer.submit(timeoutCallback);
         String output = timeoutFuture.get(timeout, TimeUnit.SECONDS);
         sendMessage(output);
-        //rabbitTemplate.convertAndSend();
 
         }catch (Exception e){
             e.printStackTrace();
