@@ -73,6 +73,7 @@ public class ScriptExecutors {
 
         Future<String> timeoutFuture = timer.submit(timeoutCallback);
         String output = timeoutFuture.get(timeout, TimeUnit.SECONDS);
+
         sendMessage(output);
 
         }catch (Exception e){
@@ -82,6 +83,7 @@ public class ScriptExecutors {
     }
 
     private void sendMessage(String output) {
+
         if (queueCommunicationUtils != null) {
             queueCommunicationUtils.sendMessageForScriptExecutionStatus(output);
         }
