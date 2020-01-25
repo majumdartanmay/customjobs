@@ -41,8 +41,7 @@ public class FileStorageService {
         String fileName = file.getOriginalFilename().replace(filePrefix, name);
         Path targetLocation = this.fileAbsolutePath.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-        Scripts data = scriptDbHelpers.createRecord(userName, fileName, fileAbsolutePath.toAbsolutePath().toString(), ScriptStatus.QUEUED);
-        return data;
+        return scriptDbHelpers.createRecord(userName, fileName, fileAbsolutePath.toAbsolutePath().toString(), ScriptStatus.QUEUED);
     }
 
     public Resource loadFileAsResource(String fileName) {
