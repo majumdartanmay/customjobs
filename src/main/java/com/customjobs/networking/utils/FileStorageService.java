@@ -45,7 +45,7 @@ public class FileStorageService {
         String fileName = file.getOriginalFilename().replace(filePrefix, name);
         Path targetLocation = completePath.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-        return scriptDbHelpers.createRecord(
+        return scriptDbHelpers.createOrUpdate(
                 userName,
                 fileName,
                 completePath.toAbsolutePath().toString(),

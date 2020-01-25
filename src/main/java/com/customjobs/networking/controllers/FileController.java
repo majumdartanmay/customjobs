@@ -3,7 +3,7 @@ package com.customjobs.networking.controllers;
 import com.customjobs.networking.configurations.RabbitMQConfigurations;
 import com.customjobs.networking.entity.Scripts;
 import com.customjobs.networking.utils.FileStorageService;
-import com.customjobs.networking.utils.Queue.MessageSender;
+import com.customjobs.networking.utils.queue.MessageSender;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

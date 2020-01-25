@@ -1,4 +1,4 @@
-package com.customjobs.networking.utils.Queue;
+package com.customjobs.networking.utils.queue;
 
 import com.customjobs.networking.configurations.RabbitMQConfigurations;
 import lombok.Data;
@@ -22,7 +22,7 @@ public class QueueCommunicationUtils {
         messageSender.sendMessage(
                 rabbitTemplate,
                 rabbitMQConfigurations.getQueueExchange(),
-                rabbitMQConfigurations.getQueueName(),
+                rabbitMQConfigurations.getRoutingKey(),
                 data
                 );
     }

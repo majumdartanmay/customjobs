@@ -1,27 +1,39 @@
 package com.customjobs.networking.utils.executors;
 
+import com.customjobs.networking.helpers.ScriptDbHelpers;
 import com.customjobs.networking.utils.CommandExecutors;
+import com.customjobs.networking.utils.Constants;
 import com.customjobs.networking.utils.FileStorageService;
-import com.customjobs.networking.utils.Queue.QueueCommunicationUtils;
+import com.customjobs.networking.utils.queue.QueueCommunicationUtils;
+import com.customjobs.networking.utils.ScriptStatus;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.*;
+@Component
+public class ScriptExecutors implements ApplicationContextAware {
 
-public class ScriptExecutors {
+    private static ApplicationContext ctx;
 
     private String absolutePath;
-    private String user;
+    private String userName;
     private String scriptName;
     private int timeout = 10;
     private CommandExecutors commandExecutors;
     private static final String virtualEnvPrefix = "venv";
     private QueueCommunicationUtils queueCommunicationUtils;
 
-    public ScriptExecutors(String absolutePath, String user, String scriptName) {
+    private ScriptExecutors(){}
+
+    public ScriptExecutors(String absolutePath, String userName, String scriptName) {
 
         this.absolutePath = absolutePath;
-        this.user = user;
+        this.userName = userName;
         this.scriptName = scriptName;
         commandExecutors = new CommandExecutors();
         commandExecutors.setWorkingDirectory(absolutePath);
@@ -33,10 +45,6 @@ public class ScriptExecutors {
 
     public void setQueueCommunicationUtils(QueueCommunicationUtils queueCommunicationUtils) {
         this.queueCommunicationUtils = queueCommunicationUtils;
-    }
-
-    private void activateVirtualEnvironment(String virtualEnvironment) {
-        commandExecutors.executeCommand(String.format("cd", absolutePath,"\\%s\\Scripts\\activate.bat", virtualEnvironment));
     }
 
     private void setVirtualEnvironment(String virtualEnvironment){
@@ -51,7 +59,7 @@ public class ScriptExecutors {
 
     public void executeScript(FileStorageService fileStorageService) {
 
-        String virtualPath = fileStorageService.getVirtualEnvironmentOfUser(user, virtualEnvPrefix);
+        String virtualPath = fileStorageService.getVirtualEnvironmentOfUser(userName, virtualEnvPrefix);
 
         try {
 
@@ -62,14 +70,19 @@ public class ScriptExecutors {
                         String.format("%s\\Scripts\\python.exe", virtualPath) , scriptName);
                 System.out.println(output);
                 sendMessage(output);
+                updateScriptExecutionStatus(ScriptStatus.COMPLETED);
             }
         );
+
+
 
         ExecutorService timer = Executors.newCachedThreadPool();
         Callable<String> timeoutCallback = () -> {
             service.shutdownNow();
             return "Script time limit exceeded";
         };
+
+        updateScriptExecutionStatus(ScriptStatus.PROCESSING);
 
         Future<String> timeoutFuture = timer.submit(timeoutCallback);
         String output = timeoutFuture.get(timeout, TimeUnit.SECONDS);
@@ -82,10 +95,20 @@ public class ScriptExecutors {
 
     }
 
-    private void sendMessage(String output) {
+    private void updateScriptExecutionStatus(ScriptStatus scriptStatus) {
+        ScriptDbHelpers scriptDbHelpers = (ScriptDbHelpers)ctx.getBean(Constants.scriptDBHelpersIdentifier);
+        scriptDbHelpers.updateScriptStatus(scriptName, scriptStatus);
+    }
 
+    private void sendMessage(String output) {
         if (queueCommunicationUtils != null) {
             queueCommunicationUtils.sendMessageForScriptExecutionStatus(output);
         }
     }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        ctx = applicationContext;
+    }
+
 }

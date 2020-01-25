@@ -2,7 +2,7 @@ package com.customjobs.networking.services;
 
 import com.customjobs.networking.dto.ScriptExecutionModel;
 import com.customjobs.networking.utils.FileStorageService;
-import com.customjobs.networking.utils.Queue.QueueCommunicationUtils;
+import com.customjobs.networking.utils.queue.QueueCommunicationUtils;
 import com.customjobs.networking.utils.executors.ScriptExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
