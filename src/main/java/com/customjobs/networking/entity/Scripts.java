@@ -2,7 +2,6 @@ package com.customjobs.networking.entity;
 
 import com.customjobs.networking.utils.ScriptStatus;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
