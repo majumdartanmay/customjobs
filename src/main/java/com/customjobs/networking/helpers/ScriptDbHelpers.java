@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Component
 public class ScriptDbHelpers {
     @Autowired
@@ -27,5 +30,13 @@ public class ScriptDbHelpers {
 
     public void updateScriptStatus(String scriptId, ScriptStatus scriptStatus) {
         scriptsRepository.updateScriptStatus(scriptId, scriptStatus);
+    }
+
+    public List<Scripts> getUserScripts(String userName,
+                                        LocalDateTime startDate,
+                                        LocalDateTime endDate,
+                                        int limit,
+                                        int offset) {
+        return scriptsRepository.getUserScripts(userName, startDate, endDate, limit);
     }
 }
