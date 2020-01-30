@@ -17,15 +17,6 @@ import java.nio.file.Path;
 @RequestMapping("executor")
 public class ScriptController {
 
-//    @Autowired
-//    private RabbitTemplate rabbitTemplate;
-//
-//    @Autowired
-//    private RabbitMQConfigurations rabbitMQConfigurations;
-//
-//    @Autowired
-//    private MessageSender messageSender;
-
     @Autowired
     QueueCommunicationUtils queueCommunicationUtils;
 
