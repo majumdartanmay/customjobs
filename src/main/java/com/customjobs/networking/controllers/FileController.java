@@ -55,9 +55,7 @@ public class FileController {
         LocalDateTime endDate = _endDate.orElse(LocalDateTime.MAX);
         int offset = _offset.orElse(0);
         int limit = _limit.orElse(10);
-
         var userScripts =  scriptDbHelpers.getUserScripts(userName, startDate, endDate, limit, offset);
-
         return new ResponseEntity<>(userScripts, HttpStatus.OK);
 
     }
